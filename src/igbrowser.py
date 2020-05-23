@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 _XPATHS = constants.XPATHS
 
+
 class Action(Enum):
     LIKE = "like"
     UNLIKE = "unlike"
@@ -72,17 +73,13 @@ class Post:
 
     @rand_sleep
     def like(self):
-        button = self.container.find_element(
-            By.XPATH, _XPATHS["like_unlike_button"]
-        )
+        button = self.container.find_element(By.XPATH, _XPATHS["like_unlike_button"])
         if button.get_attribute("aria-label") == "Like":
             self._scroll_to_and_click(button)
 
     @rand_sleep
     def unlike(self):
-        button = self.container.find_element(
-            By.XPATH, _XPATHS["like_unlike_button"]
-        )
+        button = self.container.find_element(By.XPATH, _XPATHS["like_unlike_button"])
         if button.get_attribute("aria-label") == "Unlike":
             self._scroll_to_and_click(button)
 
