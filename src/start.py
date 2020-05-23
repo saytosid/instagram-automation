@@ -14,7 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 class Controller:
-    def __init__(self, login_credentials: LoginCredentials, actions: Dict, webdriver_path: str):
+    def __init__(
+        self, login_credentials: LoginCredentials, actions: Dict, webdriver_path: str
+    ):
         options = ChromeOptions()
         options.add_argument("--user-data-dir=.user-data")
         options.add_argument("--profile-directory=.profile")
@@ -73,7 +75,9 @@ def _get_resource_type(resource: str):
 
 
 @click.command()
-@click.option("--config-file", "-c", help="Path to config file", required=True, type=click.File())
+@click.option(
+    "--config-file", "-c", help="Path to config file", required=True, type=click.File()
+)
 def cli(config_file: TextIO):
     Controller(*config_file_parser(config_file)).run()
 
