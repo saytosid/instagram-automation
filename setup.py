@@ -3,10 +3,11 @@ from setuptools import setup
 setup(
     name="instagram-automation",
     version="0.1",
-    py_modules=["igbrowser"],
-    install_requires=["Click",],
+    package_dir={"": "src"},
+    py_modules=["igbrowser", "actionfilter", "start", "constants"],
+    install_requires=["Click", "selenium"],
     entry_points="""
         [console_scripts]
-        yourscript=yourscript:cli
+        instagram-automation=start:cli
     """,
 )
