@@ -1,24 +1,20 @@
 #!/usr/bin/env python
-from igbrowser import IGBrowser, LoginCredentials, Action
+from igbrowser import IGBrowser, LoginCredentials, Action, Post
 import constants
 from selenium.webdriver import Chrome, ChromeOptions
-import random
+import actionfilter
 import logging
+import click
+import json
+from typing import TextIO, Dict, NamedTuple, Iterable
+from collections import defaultdict
 
 
 logger = logging.getLogger(__name__)
 
 
-class ProbabilisticActionFilter:
-    def __init__(self, probability_success: float):
-        self.probability_success = probability_success
-
-    def __call__(self) -> bool:
-        return random.random() < self.probability_success
-
-
 class Controller:
-    def __init__(self):
+    def __init__(self, login_credentials: LoginCredentials, actions: Dict):
         options = ChromeOptions()
         options.add_argument("--user-data-dir=.user-data")
         options.add_argument("--profile-directory=.profile")
@@ -26,16 +22,61 @@ class Controller:
         self.browser = Chrome("./chromedriver.exe", options=options)
         self.browser.implicitly_wait(3)
 
+        self.__login_credentials = login_credentials
+        self.actions = actions
+
     def run(self):
         ig_browser = IGBrowser(self.browser)
         if not ig_browser.logged_in:
-            ig_browser.login(LoginCredentials(*constants.USERNAME_PWD))
+            ig_browser.login(self.__login_credentials)
 
-        action_filter = ProbabilisticActionFilter(0.8)
         for post in ig_browser.get_posts():
-            if action_filter():
-                post.perform_action(Action.LIKE)
+            for (action, filter_group) in self.actions[Post]:
+                if filter_group():
+                    post.perform_action(action)
+
+
+class ActionConfig(NamedTuple):
+    action: Action
+    filters: actionfilter.FilterGroup
+
+
+def config_file_parser(config_file):
+    config_dict = json.load(config_file)
+    login_credentials = LoginCredentials(
+        config_dict["username"], config_dict["password"]
+    )
+
+    actions = defaultdict(list)
+    for resource_str, actions_json in config_dict["actions"].items():
+        resource_type = _get_resource_type(resource_str)
+        for action_config_json in actions_json:
+            action = Action(action_config_json["actionName"])
+            filter_group = _get_filter_group(action_config_json["filters"])
+            actions[resource_type].append(ActionConfig(action, filter_group))
+
+    return login_credentials, actions
+
+
+def _get_filter_group(filters_config: Iterable):
+    return actionfilter.FilterGroup(
+        filters=[
+            getattr(actionfilter, f_cfg["filterName"])(**f_cfg["params"])
+            for f_cfg in filters_config
+        ]
+    )
+
+
+def _get_resource_type(resource: str):
+    return {"post": Post}[resource]
+
+
+@click.command()
+@click.option("--config-file", "-c", help="Path to config file", type=click.File())
+def cli(config_file: TextIO):
+    login_credentials, actions = config_file_parser(config_file)
+    Controller(login_credentials, actions).run()
 
 
 if __name__ == "__main__":
-    Controller().run()
+    cli()

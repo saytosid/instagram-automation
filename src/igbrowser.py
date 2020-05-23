@@ -15,6 +15,7 @@ from enum import Enum
 
 logger = logging.getLogger(__name__)
 
+_XPATHS = constants.XPATHS
 
 class Action(Enum):
     LIKE = "like"
@@ -72,7 +73,7 @@ class Post:
     @rand_sleep
     def like(self):
         button = self.container.find_element(
-            By.XPATH, constants.XPATH["like_unlike_button"]
+            By.XPATH, _XPATHS["like_unlike_button"]
         )
         if button.get_attribute("aria-label") == "Like":
             self._scroll_to_and_click(button)
@@ -80,7 +81,7 @@ class Post:
     @rand_sleep
     def unlike(self):
         button = self.container.find_element(
-            By.XPATH, constants.XPATH["like_unlike_button"]
+            By.XPATH, _XPATHS["like_unlike_button"]
         )
         if button.get_attribute("aria-label") == "Unlike":
             self._scroll_to_and_click(button)
@@ -93,8 +94,6 @@ class Post:
 
 
 class IGBrowser:
-    _XPATHS = constants.XPATHS
-
     def __init__(
         self, browser: selenium.webdriver.remote.webdriver.WebDriver,
     ):
@@ -109,7 +108,7 @@ class IGBrowser:
         return self.browser.find_elements(by, identifier)
 
     def get_posts(self) -> typing.Iterable[Post]:
-        post_path = self._XPATHS["post_div_format"]
+        post_path = _XPATHS["post_div_format"]
         while True:
             try:
                 yield from (
@@ -127,7 +126,7 @@ class IGBrowser:
 
     def _handle_notification_button(self):
         try:
-            notfication = self.get_element(self._XPATHS["notifications_not_now_button"])
+            notfication = self.get_element(_XPATHS["notifications_not_now_button"])
         except NoSuchElementException:
             pass
         else:
@@ -135,11 +134,11 @@ class IGBrowser:
 
     def login(self, login_credentials: LoginCredentials):
         self.browser.get(constants.INSTAGRAM_URL)
-        self.get_element(self._XPATHS["username_field"]).send_keys(
+        self.get_element(_XPATHS["username_field"]).send_keys(
             login_credentials.username
         )
 
-        password_textbox = self.get_element(self._XPATHS["password_field"])
+        password_textbox = self.get_element(_XPATHS["password_field"])
         password_textbox.send_keys(login_credentials.password)
         password_textbox.submit()
         self._handle_notification_button()
@@ -147,7 +146,7 @@ class IGBrowser:
     @property
     def logged_in(self):
         try:
-            self.get_element(self._XPATHS["my_profile_link"])
+            self.get_element(_XPATHS["my_profile_link"])
         except NoSuchElementException:
             return False
         else:

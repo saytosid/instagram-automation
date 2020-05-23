@@ -1,0 +1,19 @@
+{
+    "username": "xyz",
+    "password": "pwd",
+    "actions": {
+        "post": [
+            {
+                "actionName": "like",
+                "filters": [
+                    {
+                        "filterName": "ProbabilisticActionFilter",
+                        "params": {
+                            "probability_success": 0.1
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}
