@@ -1,6 +1,7 @@
 {
     "username": "xyz",
     "password": "pwd",
+    "webdriverPath": "./chromedriver.exe",
     "actions": {
         "post": [
             {
