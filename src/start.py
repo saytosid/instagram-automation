@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-from igbrowser import IGBrowser, LoginCredentials, Action, Post
-import constants
-from selenium.webdriver import Chrome, ChromeOptions
 import actionfilter
+from igbrowser import IGBrowser, LoginCredentials, Action, Post
+
 import logging
 import click
 import json
+from selenium.webdriver import Chrome, ChromeOptions
 from typing import TextIO, Dict, NamedTuple, Iterable
 from collections import defaultdict
 
