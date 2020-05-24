@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-from igbrowser import IGBrowser, LoginCredentials, Action, Post
-import constants
-from selenium.webdriver import Chrome, ChromeOptions
 import actionfilter
+from igbrowser import IGBrowser, LoginCredentials, Action, Post
+
 import logging
 import click
 import json
+from selenium.webdriver import Chrome, ChromeOptions
 from typing import TextIO, Dict, NamedTuple, Iterable
 from collections import defaultdict
 
@@ -14,12 +14,14 @@ logger = logging.getLogger(__name__)
 
 
 class Controller:
-    def __init__(self, login_credentials: LoginCredentials, actions: Dict):
+    def __init__(
+        self, login_credentials: LoginCredentials, actions: Dict, webdriver_path: str
+    ):
         options = ChromeOptions()
         options.add_argument("--user-data-dir=.user-data")
         options.add_argument("--profile-directory=.profile")
 
-        self.browser = Chrome("./chromedriver.exe", options=options)
+        self.browser = Chrome(webdriver_path, options=options)
         self.browser.implicitly_wait(3)
 
         self.__login_credentials = login_credentials
@@ -46,6 +48,7 @@ def config_file_parser(config_file):
     login_credentials = LoginCredentials(
         config_dict["username"], config_dict["password"]
     )
+    webdriver_path = config_dict["webdriverPath"]
 
     actions = defaultdict(list)
     for resource_str, actions_json in config_dict["actions"].items():
@@ -55,7 +58,7 @@ def config_file_parser(config_file):
             filter_group = _get_filter_group(action_config_json["filters"])
             actions[resource_type].append(ActionConfig(action, filter_group))
 
-    return login_credentials, actions
+    return login_credentials, actions, webdriver_path
 
 
 def _get_filter_group(filters_config: Iterable):
@@ -72,10 +75,11 @@ def _get_resource_type(resource: str):
 
 
 @click.command()
-@click.option("--config-file", "-c", help="Path to config file", type=click.File())
+@click.option(
+    "--config-file", "-c", help="Path to config file", required=True, type=click.File()
+)
 def cli(config_file: TextIO):
-    login_credentials, actions = config_file_parser(config_file)
-    Controller(login_credentials, actions).run()
+    Controller(*config_file_parser(config_file)).run()
 
 
 if __name__ == "__main__":

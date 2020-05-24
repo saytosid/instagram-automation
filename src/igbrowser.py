@@ -1,17 +1,16 @@
+import constants
+
+import logging
+import time
+import random
+import typing
+from enum import Enum
 import selenium.webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.action_chains import ActionChains
-import logging
-import time
-import random
-import typing
-import pickle
 
-import constants
-from pprint import pprint
-from enum import Enum
 
 logger = logging.getLogger(__name__)
 
