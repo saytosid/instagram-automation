@@ -106,13 +106,14 @@ class IGBrowser:
     def get_posts(self) -> typing.Iterable[Post]:
         post_path = _XPATHS["post_div_format"]
         while True:
-            try:
-                yield from (
-                    Post(self.get_element(post_path.format(i)), self.browser)
-                    for i in range(1, 100)
-                )  # TODO: Return Post object
-            except NoSuchElementException:
-                self.scroll(2)
+            for i in range(1, 100):
+                try:
+                    post_container = self.get_element(post_path.format(i))
+                except NoSuchElementException:
+                    self.scroll(1)
+                else:
+                    ActionChains(self.browser).move_to_element(post_container)
+                    yield Post(self.get_element(post_path.format(i)), self.browser)
 
     @rand_sleep
     def scroll(self, num):
