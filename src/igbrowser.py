@@ -4,6 +4,7 @@ import logging
 import time
 import random
 import typing
+from functools import wraps
 from enum import Enum
 import selenium.webdriver
 from selenium.webdriver.common.by import By
@@ -38,10 +39,11 @@ class LoginCredentials(typing.NamedTuple):
         return repr(self)
 
 
-def rand_sleep(func):
+def rand_sleep(func, _sleep_fn=time.sleep):
+    @wraps(func)
     def decorated(*args, **kwargs):
         func(*args, **kwargs)
-        time.sleep(random.random() * 2)
+        _sleep_fn(random.random() * 2)
 
     return decorated
 
