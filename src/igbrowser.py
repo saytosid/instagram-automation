@@ -67,22 +67,23 @@ class Post:
 
     @property
     def content(self):
-        ...
+        raise NotImplementedError
 
     def _scroll_to_and_click(self, button):
         ActionChains(self.browser).move_to_element(button).click(button).perform()
 
-    @rand_sleep
-    def like(self):
+    def _like_unlike_helper(self, aria_label):
         button = self.container.find_element(By.XPATH, _XPATHS["like_unlike_button"])
-        if button.get_attribute("aria-label") == "Like":
+        if button.get_attribute("aria-label") == aria_label:
             self._scroll_to_and_click(button)
 
     @rand_sleep
+    def like(self):
+        self._like_unlike_helper("Like")
+
+    @rand_sleep
     def unlike(self):
-        button = self.container.find_element(By.XPATH, _XPATHS["like_unlike_button"])
-        if button.get_attribute("aria-label") == "Unlike":
-            self._scroll_to_and_click(button)
+        self._like_unlike_helper("Unlike")
 
     def comment(self, comment):
         raise NotImplementedError
