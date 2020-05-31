@@ -14,21 +14,13 @@ logger = logging.getLogger(__name__)
 
 
 class Controller:
-    def __init__(
-        self, login_credentials: LoginCredentials, actions: Dict, webdriver_path: str
-    ):
-        options = ChromeOptions()
-        options.add_argument("--user-data-dir=.user-data")
-        options.add_argument("--profile-directory=.profile")
-
-        self.browser = Chrome(webdriver_path, options=options)
-        self.browser.implicitly_wait(3)
-
+    def __init__(self, login_credentials: LoginCredentials, actions: Dict, browser):
+        self.browser = browser
         self.__login_credentials = login_credentials
         self.actions = actions
 
-    def run(self):
-        ig_browser = IGBrowser(self.browser)
+    def run(self, igbrowser_type=IGBrowser):
+        ig_browser = igbrowser_type(self.browser)
         if not ig_browser.logged_in:
             ig_browser.login(self.__login_credentials)
 
@@ -79,7 +71,15 @@ def _get_resource_type(resource: str):
     "--config-file", "-c", help="Path to config file", required=True, type=click.File()
 )
 def cli(config_file: TextIO):
-    Controller(*config_file_parser(config_file)).run()
+    login_credentials, actions, webdriver_path = config_file_parser(config_file)
+    options = ChromeOptions()
+    options.add_argument("--user-data-dir=.user-data")
+    options.add_argument("--profile-directory=.profile")
+
+    browser = Chrome(webdriver_path, options=options)
+    browser.implicitly_wait(3)
+
+    Controller(login_credentials, actions, browser).run()
 
 
 if __name__ == "__main__":
